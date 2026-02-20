@@ -4,8 +4,8 @@
   "manifest_version": 1,
   "action": {
     "title": "Rolar Atributos",
-    "icon": "Gemini_Generated_Image_nydcrcnydcrcnydc.png",
-    "popover": "index.html",
+    "icon": "https://seediam.github.io/fatesystem_dices/Gemini_Generated_Image_nydcrcnydcrcnydc.png",
+    "popover": "https://seediam.github.io/fatesystem_dices/index.html",
     "width": 350,
     "height": 600
   }
