@@ -1,12 +1,11 @@
 {
   "name": "Dados de Atributo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "manifest_version": 1,
-  "permissions": ["BROADCAST"],
   "action": {
     "title": "Rolador d20",
     "icon": "https://seediam.github.io/fatesystem_dices/Gemini_Generated_Image_nydcrcnydcrcnydc.png",
-    "popover": "https://seediam.github.io/fatesystem_dices/index.html?v=1.0.2",
+    "popover": "https://seediam.github.io/fatesystem_dices/index.html",
     "width": 350,
     "height": 600
   }
