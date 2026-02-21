@@ -1,191 +1,265 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Rolador d20 por Atributo</title>
-  <style>
-    :root {
-      --fundo: #1f1f1f;
-      --painel: #2b2b2b;
-      --texto: #f0f0f0;
-      --muted: #9a9a9a;
-      --amarelo: #f0b90b;
-      --forca: #ff3b3b;
-      --magia: #3f7dff;
-      --agilidade: #b14dff;
-      --sorte: #33cc66;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 14px;
-      background: var(--fundo);
-      color: var(--texto);
-      font-family: "Segoe UI", Tahoma, sans-serif;
-    }
-
-    h2 {
-      margin: 0 0 12px;
-      text-align: center;
-      letter-spacing: 1px;
-      font-size: 19px;
-      text-transform: uppercase;
-    }
-
-    .hint {
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
-
-    .atributo {
-      background: var(--painel);
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-left: 6px solid transparent;
-    }
-
-    .forca { border-color: var(--forca); }
-    .magia { border-color: var(--magia); }
-    .agilidade { border-color: var(--agilidade); }
-    .sorte { border-color: var(--sorte); }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .titulo {
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .contador {
-      min-width: 30px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .botoes {
-      display: flex;
-      gap: 6px;
-    }
-
-    .btn-ajuste {
-      border: none;
-      border-radius: 6px;
-      width: 30px;
-      height: 30px;
-      font-size: 18px;
-      font-weight: 800;
-      color: #fff;
-      cursor: pointer;
-      line-height: 30px;
-    }
-
-    .btn-ajuste:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .forca .btn-ajuste { background: #b82323; }
-    .magia .btn-ajuste { background: #2352b8; }
-    .agilidade .btn-ajuste { background: #7f2ab3; }
-    .sorte .btn-ajuste { background: #25994c; }
-
-    .resumo {
-      margin-top: 8px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    #btn-rolar {
-      width: 100%;
-      margin-top: 12px;
-      padding: 13px;
-      border: none;
-      border-radius: 8px;
-      background: var(--amarelo);
-      color: #111;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      text-transform: uppercase;
-    }
-
-    #btn-rolar:hover { filter: brightness(1.06); }
-
-    #status-texto {
-      margin-top: 12px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-      word-break: break-word;
-    }
-  </style>
-</head>
-<body>
-  <h2>Rolador d20</h2>
-  <div class="hint">Clique em <b>+</b> ou <b>-</b> para escolher quantos dados cada atributo vai rolar.</div>
-
-  <div class="atributo forca" data-attr="forca" data-cor="dddice-red">
-    <div class="row">
-      <span class="titulo">Força (Vermelho)</span>
-      <div class="botoes">
-        <button class="btn-ajuste" data-action="decrement">−</button>
-        <span class="contador" id="count-forca">0</span>
-        <button class="btn-ajuste" data-action="increment">+</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="atributo magia" data-attr="magia" data-cor="dddice-blue">
-    <div class="row">
-      <span class="titulo">Magia (Azul)</span>
-      <div class="botoes">
-        <button class="btn-ajuste" data-action="decrement">−</button>
-        <span class="contador" id="count-magia">0</span>
-        <button class="btn-ajuste" data-action="increment">+</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="atributo agilidade" data-attr="agilidade" data-cor="dddice-purple">
-    <div class="row">
-      <span class="titulo">Agilidade (Roxa)</span>
-      <div class="botoes">
-        <button class="btn-ajuste" data-action="decrement">−</button>
-        <span class="contador" id="count-agilidade">0</span>
-        <button class="btn-ajuste" data-action="increment">+</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="atributo sorte" data-attr="sorte" data-cor="dddice-green">
-    <div class="row">
-      <span class="titulo">Sorte (Verde)</span>
-      <div class="botoes">
-        <button class="btn-ajuste" data-action="decrement">−</button>
-        <span class="contador" id="count-sorte">0</span>
-        <button class="btn-ajuste" data-action="increment">+</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="resumo" id="resumo-dados">Total de dados: 0</div>
-  <button id="btn-rolar">Rolar todos os dados</button>
-  <div id="status-texto">Aguardando seleção...</div>
-
-    <script type="module" src="./script.js"></script>
-
-</body>
-</html>
+diff --git a/index.html b/index.html
+index f127b73961d1a379ade916ef1ffe715585e688f3..9ed986d885cd7d3e937b65dbce8afaf27b4cbfa5 100644
+--- a/index.html
++++ b/index.html
+@@ -1,79 +1,192 @@
+ <!DOCTYPE html>
+ <html lang="pt-BR">
+ <head>
+   <meta charset="UTF-8">
+-  <title>Rolador de Atributos</title>
++  <title>Rolador d20 por Atributo</title>
+   <style>
+-    body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #242424; color: #ffffff; padding: 15px; margin: 0; }
+-    h2 { text-align: center; margin-top: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+-    .atributo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px; border-radius: 6px; background-color: #333333; }
+-    .forca { border-left: 6px solid #ff3333; }
+-    .magia { border-left: 6px solid #3366ff; }
+-    .agilidade { border-left: 6px solid #b84dff; }
+-    .sorte { border-left: 6px solid #33cc33; }
+-    input[type="number"] { width: 50px; padding: 8px; border-radius: 4px; border: 1px solid #555; background-color: #1a1a1a; color: white; text-align: center; font-size: 16px; }
+-    button { width: 100%; padding: 15px; font-size: 16px; font-weight: bold; background-color: #e0a900; color: #111; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+-    button:hover { background-color: #ffc107; }
+-    #status-texto { text-align: center; margin-top: 15px; font-size: 14px; color: #888; font-weight: bold; }
++    :root {
++      --fundo: #1f1f1f;
++      --painel: #2b2b2b;
++      --texto: #f0f0f0;
++      --muted: #9a9a9a;
++      --amarelo: #f0b90b;
++      --forca: #ff3b3b;
++      --magia: #3f7dff;
++      --agilidade: #b14dff;
++      --sorte: #33cc66;
++    }
++
++    * { box-sizing: border-box; }
++
++    body {
++      margin: 0;
++      padding: 14px;
++      background: var(--fundo);
++      color: var(--texto);
++      font-family: "Segoe UI", Tahoma, sans-serif;
++    }
++
++    h2 {
++      margin: 0 0 12px;
++      text-align: center;
++      letter-spacing: 1px;
++      font-size: 19px;
++      text-transform: uppercase;
++    }
++
++    .hint {
++      text-align: center;
++      font-size: 12px;
++      color: var(--muted);
++      margin-bottom: 14px;
++    }
++
++    .atributo {
++      background: var(--painel);
++      border-radius: 8px;
++      padding: 10px;
++      margin-bottom: 10px;
++      border-left: 6px solid transparent;
++    }
++
++    .forca { border-color: var(--forca); }
++    .magia { border-color: var(--magia); }
++    .agilidade { border-color: var(--agilidade); }
++    .sorte { border-color: var(--sorte); }
++
++    .row {
++      display: flex;
++      justify-content: space-between;
++      align-items: center;
++      gap: 8px;
++    }
++
++    .titulo {
++      font-weight: 700;
++      font-size: 14px;
++    }
++
++    .contador {
++      min-width: 30px;
++      text-align: center;
++      font-size: 18px;
++      font-weight: 700;
++    }
++
++    .botoes {
++      display: flex;
++      gap: 6px;
++    }
++
++    .btn-ajuste {
++      border: none;
++      border-radius: 6px;
++      width: 30px;
++      height: 30px;
++      font-size: 18px;
++      font-weight: 800;
++      color: #fff;
++      cursor: pointer;
++      line-height: 30px;
++    }
++
++    .btn-ajuste:disabled {
++      opacity: 0.4;
++      cursor: not-allowed;
++    }
++
++    .forca .btn-ajuste { background: #b82323; }
++    .magia .btn-ajuste { background: #2352b8; }
++    .agilidade .btn-ajuste { background: #7f2ab3; }
++    .sorte .btn-ajuste { background: #25994c; }
++
++    .resumo {
++      margin-top: 8px;
++      text-align: center;
++      color: var(--muted);
++      font-size: 12px;
++    }
++
++    #btn-rolar {
++      width: 100%;
++      margin-top: 12px;
++      padding: 13px;
++      border: none;
++      border-radius: 8px;
++      background: var(--amarelo);
++      color: #111;
++      font-size: 15px;
++      font-weight: 800;
++      cursor: pointer;
++      text-transform: uppercase;
++    }
++
++    #btn-rolar:hover { filter: brightness(1.06); }
++
++    #status-texto {
++      margin-top: 12px;
++      text-align: center;
++      font-size: 13px;
++      color: var(--muted);
++      font-weight: 700;
++      word-break: break-word;
++    }
+   </style>
+ </head>
+ <body>
++  <h2>Rolador d20</h2>
++  <div class="hint">Clique em <b>+</b> ou <b>-</b> para escolher quantos dados cada atributo vai rolar.</div>
++
++  <div class="atributo forca" data-attr="forca" data-cor="dddice-red">
++    <div class="row">
++      <span class="titulo">Força (Vermelho)</span>
++      <div class="botoes">
++        <button class="btn-ajuste" data-action="decrement">−</button>
++        <span class="contador" id="count-forca">0</span>
++        <button class="btn-ajuste" data-action="increment">+</button>
++      </div>
++    </div>
++  </div>
++
++  <div class="atributo magia" data-attr="magia" data-cor="dddice-blue">
++    <div class="row">
++      <span class="titulo">Magia (Azul)</span>
++      <div class="botoes">
++        <button class="btn-ajuste" data-action="decrement">−</button>
++        <span class="contador" id="count-magia">0</span>
++        <button class="btn-ajuste" data-action="increment">+</button>
++      </div>
++    </div>
++  </div>
++
++  <div class="atributo agilidade" data-attr="agilidade" data-cor="dddice-purple">
++    <div class="row">
++      <span class="titulo">Agilidade (Roxa)</span>
++      <div class="botoes">
++        <button class="btn-ajuste" data-action="decrement">−</button>
++        <span class="contador" id="count-agilidade">0</span>
++        <button class="btn-ajuste" data-action="increment">+</button>
++      </div>
++    </div>
++  </div>
++
++  <div class="atributo sorte" data-attr="sorte" data-cor="dddice-green">
++    <div class="row">
++      <span class="titulo">Sorte (Verde)</span>
++      <div class="botoes">
++        <button class="btn-ajuste" data-action="decrement">−</button>
++        <span class="contador" id="count-sorte">0</span>
++        <button class="btn-ajuste" data-action="increment">+</button>
++      </div>
++    </div>
++  </div>
++
++  <div class="resumo" id="resumo-dados">Total de dados: 0</div>
++  <button id="btn-rolar">Rolar todos os dados</button>
++  <div id="status-texto">Aguardando seleção...</div>
++
++    <script src="https://cdn.jsdelivr.net/npm/@owlbear-rodeo/sdk@3.1.0/lib/index.umd.js"></script>
++    <script type="module" src="./script.js"></script>
+ 
+-  <h2>Atributos</h2>
+-  <div class="atributo forca"><label>Força (Vermelho)</label><input type="number" id="qtd-forca" value="0" min="0"></div>
+-  <div class="atributo magia"><label>Magia (Azul)</label><input type="number" id="qtd-magia" value="0" min="0"></div>
+-  <div class="atributo agilidade"><label>Agilidade (Roxo)</label><input type="number" id="qtd-agilidade" value="0" min="0"></div>
+-  <div class="atributo sorte"><label>Sorte (Verde)</label><input type="number" id="qtd-sorte" value="0" min="0"></div>
+-
+-  <button id="btn-rolar">ROLAR DADOS</button>
+-  <div id="status-texto">Aguardando rolagem...</div>
+-
+-  <script type="module">
+-    import OBR from "https://cdn.jsdelivr.net/npm/@owlbear-rodeo/sdk@3.1.0/lib/index.mjs";
+-
+-    document.getElementById('btn-rolar').addEventListener('click', async () => {
+-      const status = document.getElementById('status-texto');
+-      const atualizarAviso = (msg, cor) => {
+-        status.innerText = msg;
+-        status.style.color = cor;
+-      };
+-
+-      const forca = parseInt(document.getElementById('qtd-forca').value) || 0;
+-      const magia = parseInt(document.getElementById('qtd-magia').value) || 0;
+-      const agilidade = parseInt(document.getElementById('qtd-agilidade').value) || 0;
+-      const sorte = parseInt(document.getElementById('qtd-sorte').value) || 0;
+-
+-      let cmdDddice = [];
+-
+-      // Monta os dados para a extensão dddice que você tem na sala
+-      if (forca > 0) cmdDddice.push(`${forca}d20@dddice-red`);
+-      if (magia > 0) cmdDddice.push(`${magia}d20@dddice-blue`);
+-      if (agilidade > 0) cmdDddice.push(`${agilidade}d20@dddice-purple`);
+-      if (sorte > 0) cmdDddice.push(`${sorte}d20@dddice-green`);
+-
+-      if (cmdDddice.length === 0) {
+-        atualizarAviso("⚠️ Escolha pelo menos 1 dado!", "#ff5555");
+-        return;
+-      }
+-
+-      const rolagens = cmdDddice.join(" + ");
+-      
+-      // Essa linha prova que o botão não está morto!
+-      atualizarAviso(`Enviando dados...`, "#55ff55");
+-
+-      try {
+-        if (OBR.isAvailable) {
+-          OBR.broadcast.sendMessage("dddice/roll", { equation: rolagens });
+-        }
+-      } catch (erro) {
+-        atualizarAviso(`Erro: ${erro}`, "#ff5555");
+-      }
+-
+-      document.getElementById('qtd-forca').value = 0;
+-      document.getElementById('qtd-magia').value = 0;
+-      document.getElementById('qtd-agilidade').value = 0;
+-      document.getElementById('qtd-sorte').value = 0;
+-    });
+-  </script>
+ </body>
+ </html>
