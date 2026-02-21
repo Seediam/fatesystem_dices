@@ -1,9 +1,10 @@
 (function () {
-  const estado = {
-    forca: 0,
-    magia: 0,
-    agilidade: 0,
-    sorte: 0,
+  const estado = { forca: 0, magia: 0, agilidade: 0, sorte: 0 };
+  const labels = {
+    forca: "Força",
+    magia: "Magia",
+    agilidade: "Agilidade",
+    sorte: "Sorte",
   };
 
   const maxPorAtributo = 20;
@@ -37,15 +38,6 @@
     if (resumo) resumo.innerText = `Total de dados: ${total}`;
   }
 
-  function montarExpressaoDddice() {
-    const expr = [];
-    if (estado.forca > 0) expr.push(`${estado.forca}d20@dddice-red`);
-    if (estado.magia > 0) expr.push(`${estado.magia}d20@dddice-blue`);
-    if (estado.agilidade > 0) expr.push(`${estado.agilidade}d20@dddice-purple`);
-    if (estado.sorte > 0) expr.push(`${estado.sorte}d20@dddice-green`);
-    return expr.join(" + ");
-  }
-
   function limparSelecao() {
     Object.keys(estado).forEach((attr) => {
       estado[attr] = 0;
@@ -55,15 +47,8 @@
 
   function ajustarAtributo(attr, acao) {
     if (!(attr in estado)) return;
-
-    if (acao === "increment" && estado[attr] < maxPorAtributo) {
-      estado[attr] += 1;
-    }
-
-    if (acao === "decrement" && estado[attr] > 0) {
-      estado[attr] -= 1;
-    }
-
+    if (acao === "increment" && estado[attr] < maxPorAtributo) estado[attr] += 1;
+    if (acao === "decrement" && estado[attr] > 0) estado[attr] -= 1;
     atualizarUI();
   }
 
@@ -87,12 +72,43 @@
     });
   }
 
+  async function sendRumbleDiceViaMetadata(notation, senderName) {
+    const OBR = globalThis.OBR;
+    if (!OBR?.player?.setMetadata) {
+      throw new Error("OBR.player.setMetadata indisponível");
+    }
+
+    const payload = {
+      "com.battle-system.friends/metadata_diceroll": {
+        notation,
+        created: new Date().toISOString(),
+        sender: senderName,
+      },
+    };
+
+    await OBR.player.setMetadata(payload);
+  }
+
+  async function sendRumbleChatViaMetadata(texto, senderName) {
+    const OBR = globalThis.OBR;
+    if (!OBR?.player?.setMetadata) return;
+
+    const payload = {
+      "com.battle-system.friends/metadata_chatlog": {
+        chatlog: texto,
+        created: new Date().toISOString(),
+        sender: senderName,
+        targetId: "0000",
+      },
+    };
+
+    await OBR.player.setMetadata(payload);
+  }
+
   document.querySelectorAll(".atributo").forEach((bloco) => {
     const attr = bloco.dataset.attr;
-
     bloco.querySelectorAll(".btn-ajuste").forEach((botao) => {
-      botao.type = "button";
-      botao.addEventListener("click", function (event) {
+      botao.addEventListener("click", (event) => {
         event.preventDefault();
         ajustarAtributo(attr, botao.dataset.action);
       });
@@ -100,33 +116,42 @@
   });
 
   if (botaoRolar) {
-    botaoRolar.type = "button";
-    botaoRolar.addEventListener("click", async function (event) {
+    botaoRolar.addEventListener("click", async (event) => {
       event.preventDefault();
-      const equacao = montarExpressaoDddice();
 
-      if (!equacao) {
+      const total = Object.values(estado).reduce((acc, n) => acc + n, 0);
+      if (!total) {
         setStatus("Não Há Dados Selecionados , Selecione pelo menos 1", "#ff6868");
         return;
       }
 
-      setStatus(`Rolando: ${equacao}`, "#66dd66");
-
       try {
         const ready = await waitForOBRReady(2500);
-        const OBR = globalThis.OBR;
-        const sender = OBR && OBR.broadcast && OBR.broadcast.sendMessage;
-
-        if (!ready || typeof sender !== "function") {
-          setStatus("OBR/dddice indisponível. Verifique se a extensão está aberta na sala.", "#f0b90b");
+        if (!ready) {
+          setStatus("OBR indisponível. Abra dentro da sala do Owlbear.", "#f0b90b");
           return;
         }
 
-        sender("dddice/roll", { equation: equacao });
+        setStatus("Enviando rolagens para o Rumble...", "#66dd66");
+
+        const envios = [];
+        for (const [attr, qtd] of Object.entries(estado)) {
+          if (qtd <= 0) continue;
+          envios.push(sendRumbleDiceViaMetadata(`${qtd}d20`, labels[attr]));
+        }
+
+        await Promise.all(envios);
+
+        const resumoEnvio = Object.entries(estado)
+          .filter(([, qtd]) => qtd > 0)
+          .map(([attr, qtd]) => `${labels[attr]}: ${qtd}d20`)
+          .join(" | ");
+
+        await sendRumbleChatViaMetadata(`Rolagem enviada: ${resumoEnvio}`, "Rolador d20");
         limparSelecao();
-        setStatus("Dados enviados para o dddice.", "#66dd66");
+        setStatus("Dados enviados para o Rumble.", "#66dd66");
       } catch (erro) {
-        setStatus(`Erro ao rolar: ${erro}`, "#ff6868");
+        setStatus(`Erro ao enviar para o Rumble: ${erro}`, "#ff6868");
       }
     });
   }
