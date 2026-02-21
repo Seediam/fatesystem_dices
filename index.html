@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Rolador d20 por Atributo</title>
+  <title>Rolador d20 (Rumble)</title>
   <style>
     :root {
       --fundo: #1f1f1f;
@@ -27,7 +27,7 @@
     }
 
     h2 {
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       text-align: center;
       letter-spacing: 1px;
       font-size: 19px;
@@ -121,8 +121,6 @@
       text-transform: uppercase;
     }
 
-    #btn-rolar:hover { filter: brightness(1.06); }
-
     #status-texto {
       margin-top: 12px;
       text-align: center;
@@ -130,14 +128,15 @@
       color: var(--muted);
       font-weight: 700;
       word-break: break-word;
+      min-height: 34px;
     }
   </style>
 </head>
 <body>
-  <h2>Rolador d20</h2>
-  <div class="hint">Clique em <b>+</b> ou <b>-</b> para escolher quantos dados cada atributo vai rolar.</div>
+  <h2>Rolador d20 • Rumble</h2>
+  <div class="hint">Escolha os dados por atributo e envie para o Rumble em uma única ação.</div>
 
-  <div class="atributo forca" data-attr="forca" data-cor="dddice-red">
+  <div class="atributo forca" data-attr="forca" data-label="Força">
     <div class="row">
       <span class="titulo">Força (Vermelho)</span>
       <div class="botoes">
@@ -148,7 +147,7 @@
     </div>
   </div>
 
-  <div class="atributo magia" data-attr="magia" data-cor="dddice-blue">
+  <div class="atributo magia" data-attr="magia" data-label="Magia">
     <div class="row">
       <span class="titulo">Magia (Azul)</span>
       <div class="botoes">
@@ -159,7 +158,7 @@
     </div>
   </div>
 
-  <div class="atributo agilidade" data-attr="agilidade" data-cor="dddice-purple">
+  <div class="atributo agilidade" data-attr="agilidade" data-label="Agilidade">
     <div class="row">
       <span class="titulo">Agilidade (Roxa)</span>
       <div class="botoes">
@@ -170,7 +169,7 @@
     </div>
   </div>
 
-  <div class="atributo sorte" data-attr="sorte" data-cor="dddice-green">
+  <div class="atributo sorte" data-attr="sorte" data-label="Sorte">
     <div class="row">
       <span class="titulo">Sorte (Verde)</span>
       <div class="botoes">
@@ -182,11 +181,10 @@
   </div>
 
   <div class="resumo" id="resumo-dados">Total de dados: 0</div>
-  <button type="button" id="btn-rolar">Rolar todos os dados</button>
+  <button type="button" id="btn-rolar">Rolar no Rumble</button>
   <div id="status-texto">Aguardando seleção...</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@owlbear-rodeo/sdk@3.1.0/lib/index.umd.js"></script>
-    <script src="./script.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@owlbear-rodeo/sdk@3.1.0/lib/index.umd.js"></script>
+  <script src="./script.js"></script>
 </body>
 </html>
