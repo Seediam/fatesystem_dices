@@ -18,6 +18,20 @@
     if (cor) status.style.color = cor;
   }
 
+  function getOBR() {
+    const own = globalThis.OBR;
+    if (own) return own;
+
+    try {
+      const parentObr = globalThis.parent && globalThis.parent !== globalThis ? globalThis.parent.OBR : null;
+      if (parentObr) return parentObr;
+    } catch (_) {
+      // Ignora acesso cross-origin ao parent
+    }
+
+    return null;
+  }
+
   function atualizarUI() {
     Object.keys(estado).forEach((attr) => {
       const valor = estado[attr];
@@ -54,8 +68,18 @@
 
   function waitForOBRReady(timeoutMs) {
     return new Promise((resolve) => {
-      const OBR = globalThis.OBR;
-      if (!OBR || typeof OBR.onReady !== "function") {
+      const OBR = getOBR();
+      if (!OBR) {
+        resolve(false);
+        return;
+      }
+
+      if (OBR.player && typeof OBR.player.setMetadata === "function") {
+        resolve(true);
+        return;
+      }
+
+      if (typeof OBR.onReady !== "function") {
         resolve(false);
         return;
       }
@@ -67,42 +91,41 @@
         resolve(ok);
       };
 
-      OBR.onReady(() => finish(true));
+      OBR.onReady(() => {
+        const afterReady = getOBR();
+        finish(Boolean(afterReady?.player && typeof afterReady.player.setMetadata === "function"));
+      });
       setTimeout(() => finish(false), timeoutMs);
     });
   }
 
   async function sendRumbleDiceViaMetadata(notation, senderName) {
-    const OBR = globalThis.OBR;
+    const OBR = getOBR();
     if (!OBR?.player?.setMetadata) {
       throw new Error("OBR.player.setMetadata indisponível");
     }
 
-    const payload = {
+    await OBR.player.setMetadata({
       "com.battle-system.friends/metadata_diceroll": {
         notation,
         created: new Date().toISOString(),
         sender: senderName,
       },
-    };
-
-    await OBR.player.setMetadata(payload);
+    });
   }
 
   async function sendRumbleChatViaMetadata(texto, senderName) {
-    const OBR = globalThis.OBR;
+    const OBR = getOBR();
     if (!OBR?.player?.setMetadata) return;
 
-    const payload = {
+    await OBR.player.setMetadata({
       "com.battle-system.friends/metadata_chatlog": {
         chatlog: texto,
         created: new Date().toISOString(),
         sender: senderName,
         targetId: "0000",
       },
-    };
-
-    await OBR.player.setMetadata(payload);
+    });
   }
 
   document.querySelectorAll(".atributo").forEach((bloco) => {
@@ -126,21 +149,18 @@
       }
 
       try {
-        const ready = await waitForOBRReady(2500);
+        const ready = await waitForOBRReady(3000);
         if (!ready) {
-          setStatus("OBR indisponível. Abra dentro da sala do Owlbear.", "#f0b90b");
+          setStatus("OBR indisponível. Feche/reabra a extensão na sala para reconectar.", "#f0b90b");
           return;
         }
 
         setStatus("Enviando rolagens para o Rumble...", "#66dd66");
 
-        const envios = [];
         for (const [attr, qtd] of Object.entries(estado)) {
           if (qtd <= 0) continue;
-          envios.push(sendRumbleDiceViaMetadata(`${qtd}d20`, labels[attr]));
+          await sendRumbleDiceViaMetadata(`${qtd}d20`, labels[attr]);
         }
-
-        await Promise.all(envios);
 
         const resumoEnvio = Object.entries(estado)
           .filter(([, qtd]) => qtd > 0)
