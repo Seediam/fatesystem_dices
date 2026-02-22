@@ -13,11 +13,55 @@
   const resumo = document.getElementById("resumo-dados");
   const botaoRolar = document.getElementById("btn-rolar");
 
-  const popup = document.getElementById("dice-popup");
-  const popupSub = document.getElementById("popup-sub");
-  const popupList = document.getElementById("popup-list");
-  const popupTotal = document.getElementById("popup-total");
-  const popupClose = document.getElementById("popup-close");
+  let popup = document.getElementById("dice-popup");
+  let popupSub = document.getElementById("popup-sub");
+  let popupList = document.getElementById("popup-list");
+  let popupTotal = document.getElementById("popup-total");
+  let popupClose = document.getElementById("popup-close");
+
+  function ensurePopupElements() {
+    if (popup && popup.isConnected && popupSub && popupList && popupTotal && popupClose) return;
+
+    const style = document.createElement("style");
+    style.innerText = `
+      #dice-popup{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+      #dice-popup.visible{display:flex}
+      .popup-card{width:min(460px,95vw);background:#111822;border:1px solid #2e3a4e;border-radius:12px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+      .popup-title{margin:0 0 8px;font-size:16px;text-transform:uppercase}
+      .popup-sub{margin:0 0 12px;color:#9fb2d1;font-size:12px}
+      .popup-list{display:grid;gap:8px}
+      .popup-row{display:flex;justify-content:space-between;align-items:center;background:#1a2433;border-radius:8px;padding:8px 10px;border-left:4px solid #888}
+      .popup-row.forca{border-left-color:#ff3b3b}.popup-row.magia{border-left-color:#3f7dff}.popup-row.agilidade{border-left-color:#b14dff}.popup-row.sorte{border-left-color:#33cc66}
+      .popup-values{font-weight:700}.popup-total{margin-top:12px;font-weight:800;text-align:right}
+      .popup-close{width:100%;margin-top:12px;border:0;border-radius:8px;background:#2f7bff;color:#fff;font-weight:700;padding:9px;cursor:pointer}
+    `;
+    document.head.appendChild(style);
+
+    popup = document.createElement("div");
+    popup.id = "dice-popup";
+    popup.setAttribute("aria-hidden", "true");
+    popup.innerHTML = `
+      <div class="popup-card">
+        <h3 class="popup-title">Resultado da rolagem</h3>
+        <p class="popup-sub" id="popup-sub"></p>
+        <div class="popup-list" id="popup-list"></div>
+        <div class="popup-total" id="popup-total"></div>
+        <button type="button" class="popup-close" id="popup-close">Fechar</button>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    popupSub = popup.querySelector("#popup-sub");
+    popupList = popup.querySelector("#popup-list");
+    popupTotal = popup.querySelector("#popup-total");
+    popupClose = popup.querySelector("#popup-close");
+
+    popupClose.addEventListener("click", closePopup);
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) closePopup();
+    });
+  }
 
   function getOBR() {
     if (globalThis.OBR) return globalThis.OBR;
@@ -94,6 +138,7 @@
   }
 
   function renderPopup(result) {
+    ensurePopupElements();
     if (!popup || !popupSub || !popupList || !popupTotal) return;
 
     popupSub.innerText = `Enviado por ${result.source} • ${new Date(result.createdAt).toLocaleTimeString()}`;
@@ -140,13 +185,15 @@
 
   async function showNative3DDiceIfAvailable() {
     const OBR = getOBR();
-    if (!OBR?.dice?.roll) return;
+    if (!OBR?.dice?.roll) return false;
 
     for (const qtd of Object.values(estado)) {
       if (qtd > 0) {
         await OBR.dice.roll(`${qtd}d20`);
       }
     }
+
+    return true;
   }
 
   function setupBroadcastListener() {
@@ -188,16 +235,29 @@
       const result = gerarResultado();
       renderPopup(result);
 
-      await showNative3DDiceIfAvailable();
+      const has3D = await showNative3DDiceIfAvailable();
       const sent = await sendToPlayers(result);
-      setStatus(sent ? "Rolagem enviada para os jogadores." : "Rolagem local feita (broadcast indisponível).", sent ? "#66dd66" : "#f0b90b");
+      if (sent && has3D) {
+        setStatus("Rolagem enviada para os jogadores e dados 3D acionados.", "#66dd66");
+      } else if (sent) {
+        setStatus("Rolagem enviada para os jogadores.", "#66dd66");
+      } else if (has3D) {
+        setStatus("Rolagem local + dados 3D locais acionados.", "#f0b90b");
+      } else {
+        setStatus("Rolagem local feita (broadcast/3D indisponíveis).", "#f0b90b");
+      }
+
       limparSelecao();
     });
   }
 
   (function initOBR() {
     const OBR = getOBR();
-    if (!OBR || typeof OBR.onReady !== "function") return;
+    if (!OBR || typeof OBR.onReady !== "function") {
+      setStatus("Modo local: OBR não detectado.", "#f0b90b");
+      return;
+    }
+
     OBR.onReady(() => {
       setupBroadcastListener();
       setStatus("Conectado ao Owlbear. Pronto para rolar.", "#66dd66");
