@@ -1,6 +1,6 @@
 {
   "name": "Rolador d20 Nativo",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "manifest_version": 1,
   "action": {
     "title": "Rolador d20 Nativo",
@@ -8,5 +8,8 @@
     "popover": "https://seediam.github.io/fatesystem_dices/index.html",
     "width": 350,
     "height": 620
-  }
+  },
+  "permissions": [
+    "BROADCAST"
+  ]
 }
