@@ -1,9 +1,9 @@
 {
-  "name": "Rolador d20 (Rumble)",
-  "version": "2.0.0",
+  "name": "Rolador d20 Nativo",
+  "version": "3.0.0",
   "manifest_version": 1,
   "action": {
-    "title": "Rolador d20 • Rumble",
+    "title": "Rolador d20 Nativo",
     "icon": "https://seediam.github.io/fatesystem_dices/Gemini_Generated_Image_nydcrcnydcrcnydc.png",
     "popover": "https://seediam.github.io/fatesystem_dices/index.html",
     "width": 350,
