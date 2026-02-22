@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Rolador d20 (Rumble)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rolador d20 Nativo</title>
   <style>
     :root {
       --fundo: #1f1f1f;
@@ -54,29 +55,10 @@
     .agilidade { border-color: var(--agilidade); }
     .sorte { border-color: var(--sorte); }
 
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .titulo {
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .contador {
-      min-width: 30px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .botoes {
-      display: flex;
-      gap: 6px;
-    }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .titulo { font-weight: 700; font-size: 14px; }
+    .contador { min-width: 30px; text-align: center; font-size: 18px; font-weight: 700; }
+    .botoes { display: flex; gap: 6px; }
 
     .btn-ajuste {
       border: none;
@@ -90,22 +72,13 @@
       line-height: 30px;
     }
 
-    .btn-ajuste:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
+    .btn-ajuste:disabled { opacity: 0.4; cursor: not-allowed; }
     .forca .btn-ajuste { background: #b82323; }
     .magia .btn-ajuste { background: #2352b8; }
     .agilidade .btn-ajuste { background: #7f2ab3; }
     .sorte .btn-ajuste { background: #25994c; }
 
-    .resumo {
-      margin-top: 8px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-    }
+    .resumo { margin-top: 8px; text-align: center; color: var(--muted); font-size: 12px; }
 
     #btn-rolar {
       width: 100%;
@@ -130,13 +103,68 @@
       word-break: break-word;
       min-height: 34px;
     }
+
+    #dice-popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    #dice-popup.visible { display: flex; }
+
+    .popup-card {
+      width: min(460px, 95vw);
+      background: #111822;
+      border: 1px solid #2e3a4e;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .popup-title { margin: 0 0 8px; font-size: 16px; text-transform: uppercase; }
+    .popup-sub { margin: 0 0 12px; color: #9fb2d1; font-size: 12px; }
+    .popup-list { display: grid; gap: 8px; }
+
+    .popup-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1a2433;
+      border-radius: 8px;
+      padding: 8px 10px;
+      border-left: 4px solid #888;
+    }
+
+    .popup-row.forca { border-left-color: var(--forca); }
+    .popup-row.magia { border-left-color: var(--magia); }
+    .popup-row.agilidade { border-left-color: var(--agilidade); }
+    .popup-row.sorte { border-left-color: var(--sorte); }
+
+    .popup-values { font-weight: 700; }
+    .popup-total { margin-top: 12px; font-weight: 800; text-align: right; }
+    .popup-close {
+      width: 100%;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 8px;
+      background: #2f7bff;
+      color: #fff;
+      font-weight: 700;
+      padding: 9px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h2>Rolador d20 • Rumble</h2>
-  <div class="hint">Escolha os dados por atributo e envie para o Rumble em uma única ação.</div>
+  <h2>Rolador d20 Nativo</h2>
+  <div class="hint">Sem extensão externa: rola aqui, mostra popup e sincroniza com os jogadores via broadcast.</div>
 
-  <div class="atributo forca" data-attr="forca" data-label="Força">
+  <div class="atributo forca" data-attr="forca">
     <div class="row">
       <span class="titulo">Força (Vermelho)</span>
       <div class="botoes">
@@ -147,7 +175,7 @@
     </div>
   </div>
 
-  <div class="atributo magia" data-attr="magia" data-label="Magia">
+  <div class="atributo magia" data-attr="magia">
     <div class="row">
       <span class="titulo">Magia (Azul)</span>
       <div class="botoes">
@@ -158,7 +186,7 @@
     </div>
   </div>
 
-  <div class="atributo agilidade" data-attr="agilidade" data-label="Agilidade">
+  <div class="atributo agilidade" data-attr="agilidade">
     <div class="row">
       <span class="titulo">Agilidade (Roxa)</span>
       <div class="botoes">
@@ -169,7 +197,7 @@
     </div>
   </div>
 
-  <div class="atributo sorte" data-attr="sorte" data-label="Sorte">
+  <div class="atributo sorte" data-attr="sorte">
     <div class="row">
       <span class="titulo">Sorte (Verde)</span>
       <div class="botoes">
@@ -181,8 +209,18 @@
   </div>
 
   <div class="resumo" id="resumo-dados">Total de dados: 0</div>
-  <button type="button" id="btn-rolar">Rolar no Rumble</button>
+  <button type="button" id="btn-rolar">Rolar dados</button>
   <div id="status-texto">Aguardando seleção...</div>
+
+  <div id="dice-popup" aria-hidden="true">
+    <div class="popup-card">
+      <h3 class="popup-title">Resultado da rolagem</h3>
+      <p class="popup-sub" id="popup-sub"></p>
+      <div class="popup-list" id="popup-list"></div>
+      <div class="popup-total" id="popup-total"></div>
+      <button type="button" class="popup-close" id="popup-close">Fechar</button>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@owlbear-rodeo/sdk@3.1.0/lib/index.umd.js"></script>
   <script src="./script.js"></script>
