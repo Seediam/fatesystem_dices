@@ -1,6 +1,6 @@
 {
   "name": "Rolador d20 Nativo",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "manifest_version": 1,
   "action": {
     "title": "Rolador d20 Nativo",
@@ -10,5 +10,7 @@
     "height": 620
   },
   "permissions": [
+    "broadcast",
+    "dice"
   ]
 }
