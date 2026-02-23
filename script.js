@@ -69,7 +69,9 @@
       if (globalThis.parent && globalThis.parent !== globalThis && globalThis.parent.OBR) {
         return globalThis.parent.OBR;
       }
-    } catch (_) {}
+    } catch (_) {
+      // Ignora erro de acesso cross-origin
+    }
     return null;
   }
 
@@ -130,6 +132,7 @@
     });
 
     return {
+      channel: CHANNEL,
       createdAt: new Date().toISOString(),
       source: "Rolador d20 Nativo",
       attributes,
@@ -171,6 +174,13 @@
     popup.setAttribute("aria-hidden", "true");
   }
 
+  function extractBroadcastPayload(eventOrData) {
+    if (!eventOrData) return null;
+    const payload = eventOrData.data ?? eventOrData;
+    if (!payload || !Array.isArray(payload.attributes)) return null;
+    return payload;
+  }
+
   async function sendToPlayers(result) {
     const OBR = getOBR();
     if (!OBR?.broadcast?.sendMessage) return false;
@@ -187,13 +197,18 @@
     const OBR = getOBR();
     if (!OBR?.dice?.roll) return false;
 
+    let rolled = false;
     for (const qtd of Object.values(estado)) {
-      if (qtd > 0) {
+      if (qtd <= 0) continue;
+      try {
         await OBR.dice.roll(`${qtd}d20`);
+        rolled = true;
+      } catch (_) {
+        // Continua para tentar os demais atributos.
       }
     }
 
-    return true;
+    return rolled;
   }
 
   function setupBroadcastListener() {
@@ -201,8 +216,8 @@
     if (!OBR?.broadcast?.onMessage) return;
 
     OBR.broadcast.onMessage(CHANNEL, (event) => {
-      const data = event?.data;
-      if (!data || !Array.isArray(data.attributes)) return;
+      const data = extractBroadcastPayload(event);
+      if (!data) return;
       renderPopup(data);
     });
   }
@@ -218,9 +233,11 @@
   });
 
   if (popupClose) popupClose.addEventListener("click", closePopup);
-  if (popup) popup.addEventListener("click", (e) => {
-    if (e.target === popup) closePopup();
-  });
+  if (popup) {
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) closePopup();
+    });
+  }
 
   if (botaoRolar) {
     botaoRolar.addEventListener("click", async (event) => {
@@ -228,7 +245,7 @@
 
       const totalSelecionado = Object.values(estado).reduce((acc, n) => acc + n, 0);
       if (!totalSelecionado) {
-        setStatus("Não Há Dados Selecionados , Selecione pelo menos 1", "#ff6868");
+        setStatus("Não há dados selecionados. Escolha pelo menos 1.", "#ff6868");
         return;
       }
 
@@ -240,9 +257,9 @@
       if (sent && has3D) {
         setStatus("Rolagem enviada para os jogadores e dados 3D acionados.", "#66dd66");
       } else if (sent) {
-        setStatus("Rolagem enviada para os jogadores.", "#66dd66");
+        setStatus("Rolagem enviada para os jogadores (3D indisponível).", "#f0b90b");
       } else if (has3D) {
-        setStatus("Rolagem local + dados 3D locais acionados.", "#f0b90b");
+        setStatus("Rolagem local com dados 3D locais (broadcast indisponível).", "#f0b90b");
       } else {
         setStatus("Rolagem local feita (broadcast/3D indisponíveis).", "#f0b90b");
       }
@@ -260,7 +277,19 @@
 
     OBR.onReady(() => {
       setupBroadcastListener();
-      setStatus("Conectado ao Owlbear. Pronto para rolar.", "#66dd66");
+
+      const hasBroadcast = Boolean(OBR?.broadcast?.sendMessage && OBR?.broadcast?.onMessage);
+      const hasDice = Boolean(OBR?.dice?.roll);
+
+      if (hasBroadcast && hasDice) {
+        setStatus("Conectado ao Owlbear. Broadcast + Dado 3D prontos.", "#66dd66");
+      } else if (hasBroadcast) {
+        setStatus("Conectado ao Owlbear. Broadcast pronto, dado 3D indisponível.", "#f0b90b");
+      } else if (hasDice) {
+        setStatus("Conectado ao Owlbear. Dado 3D pronto, broadcast indisponível.", "#f0b90b");
+      } else {
+        setStatus("Conectado ao Owlbear, mas sem APIs de broadcast/dado 3D.", "#f0b90b");
+      }
     });
   })();
 
